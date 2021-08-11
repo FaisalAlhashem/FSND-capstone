@@ -36,7 +36,7 @@ Movies
 
 
 class Movie(db.Model):
-    __tablename__ = 'movies'
+    __tablename__ = 'Movies'
 
     id = Column(Integer, primary_key=True)
     title = Column(String)
