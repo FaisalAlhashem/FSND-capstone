@@ -49,18 +49,22 @@ def create_app(test_config=None):
     def create_movie():
         try:
             body = request.get_json()
+            MID = body.get('id', None)
             title = body.get('title', None)
             release_date = body.get('release date', None)
             if not (title and release_date):
                 raise ValueError(
                     'Some information is missing, unable to create question')
-            movie = Movie(title=title, release_date=release_date)
+            if MID:
+                movie = Movie(id=MID, title=title, release_date=release_date)
+            else:
+                movie = Movie(title=title, release_date=release_date)
             movie.insert()
         except ValueError as Value_error:
             print(Value_error.with_traceback(Value_error.__traceback__))
             abort(422)
         except Exception as e:
-            print(e.with_traceback(e.__traceback__))
+            print(e.args)
             abort(400)
 
         return jsonify({
@@ -69,7 +73,31 @@ def create_app(test_config=None):
             'movie': movie.format()
         })
 
-    @app.route("/movie/<int:movie_id>", methods=["DELETE"])
+    @app.route("/movies/<int:movie_id>", methods=["PATCH"])
+    def update_movie(movie_id):
+        try:
+            movie = Movie.query.get(movie_id)
+            if movie is None:
+                abort(404)
+            body = request.get_json()
+
+            MID = body.get('id', movie.id)
+            title = body.get('title', movie.title)
+            release_date = body.get('release date', movie.release_date)
+
+            movie.id = MID
+            movie.title = title
+            movie.release_date = release_date
+            movie.update()
+            return jsonify({
+                "success": True,
+                "updated": movie_id
+            })
+        except Exception as e:
+            print(e.args)
+            abort(400)
+
+    @app.route("/movies/<int:movie_id>", methods=["DELETE"])
     def delete_movie(movie_id):
         movie = Movie.query.filter(Movie.id == movie_id).one_or_none()
 
@@ -103,6 +131,34 @@ def create_app(test_config=None):
             'total actors': Actor.query.count()
         })
 
+    @app.route('/actors', methods=['POST'])
+    def create_actor():
+        try:
+            body = request.get_json()
+            AID = body.get('id', None)
+            name = body.get('name', None)
+            age = body.get('age', None)
+            gender = body.get('gender', None)
+            if not (name and age and gender):
+                raise ValueError(
+                    'Some information is missing, unable to create question')
+            if AID != None:
+                actor = Actor(id=AID, name=name, age=age, gender=gender)
+            else:
+                actor = Actor(name=name, age=age, gender=gender)
+            actor.insert()
+            return jsonify({
+                'success': True,
+                'actorID': actor.id,
+                'actor': actor.format()
+            })
+        except ValueError as VE:
+            print(VE.args)
+            abort(422)
+        except Exception as e:
+            print(e.args)
+            abort(400)
+
     @app.route("/actors/<int:actor_id>", methods=["DELETE"])
     def delete_actor(actor_id):
         actor = Actor.query.filter(Actor.id == actor_id).one_or_none()
@@ -116,21 +172,30 @@ def create_app(test_config=None):
             "deleted": actor_id
         })
 
-    @app.route('/actors', methods=['POST'])
-    def create_actor():
+    @app.route("/actors/<int:actor_id>", methods=["PATCH"])
+    def update_actor(actor_id):
+        actor = Actor.query.get(actor_id)
+        if actor is None:
+            abort(404)
         body = request.get_json()
-        name = body.get('name', None)
-        age = body.get('age', None)
-        gender = body.get('gender', None)
-        if not (name and age and gender):
-            abort(422)
-        actor = Actor(name=name, age=age, gender=gender)
-        actor.insert()
-        return jsonify({
-            'success': True,
-            'actorID': actor.id,
-            'actor': actor.format()
-        })
+        try:
+            AID = body.get('id', actor.id)
+            name = body.get('name', actor.name)
+            age = body.get('age', actor.age)
+            gender = body.get('gender', actor.gender)
+
+            actor.id = AID
+            actor.name = name
+            actor.age = age
+            actor.gender = gender
+            actor.update()
+            return jsonify({
+                "success": True,
+                "updated": actor_id
+            })
+        except Exception as e:
+            print(e.args)
+            abort(400)
 
 
 # Error Handling
