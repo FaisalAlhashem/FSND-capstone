@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from psycopg2 import IntegrityError
 from models import setup_db, Movie, Actor
+from auth.auth import AuthError, requires_auth
 
 NUM_OF_ITEMS_PER_PAGE = 10
 
@@ -37,7 +38,8 @@ def create_app(test_config=None):
         return movies
 
     @app.route('/movies', methods=['GET'])
-    def get_movies():
+    @requires_auth('get:movies')
+    def get_movies(jwt):
         movies = paginate_movies(request)
         return jsonify({
             'success': True,
@@ -46,7 +48,8 @@ def create_app(test_config=None):
         })
 
     @app.route('/movies', methods=['POST'])
-    def create_movie():
+    @requires_auth("post:movies")
+    def create_movie(jwt):
         try:
             body = request.get_json()
             MID = body.get('id', None)
@@ -74,7 +77,8 @@ def create_app(test_config=None):
         })
 
     @app.route("/movies/<int:movie_id>", methods=["PATCH"])
-    def update_movie(movie_id):
+    @requires_auth('patch:movies')
+    def update_movie(jwt, movie_id):
         try:
             movie = Movie.query.get(movie_id)
             if movie is None:
@@ -98,7 +102,8 @@ def create_app(test_config=None):
             abort(400)
 
     @app.route("/movies/<int:movie_id>", methods=["DELETE"])
-    def delete_movie(movie_id):
+    @requires_auth('delete:movies')
+    def delete_movie(jwt, movie_id):
         movie = Movie.query.filter(Movie.id == movie_id).one_or_none()
 
         if movie is None:
@@ -123,7 +128,8 @@ def create_app(test_config=None):
         return actors
 
     @app.route('/actors', methods=['GET'])
-    def get_actors():
+    @requires_auth('get:actors')
+    def get_actors(jwt):
         actors = paginate_actors(request)
         return jsonify({
             'success': True,
@@ -132,7 +138,8 @@ def create_app(test_config=None):
         })
 
     @app.route('/actors', methods=['POST'])
-    def create_actor():
+    @requires_auth('post:actors')
+    def create_actor(jwt):
         try:
             body = request.get_json()
             AID = body.get('id', None)
@@ -159,21 +166,9 @@ def create_app(test_config=None):
             print(e.args)
             abort(400)
 
-    @app.route("/actors/<int:actor_id>", methods=["DELETE"])
-    def delete_actor(actor_id):
-        actor = Actor.query.filter(Actor.id == actor_id).one_or_none()
-
-        if actor is None:
-            abort(404)
-
-        actor.delete()
-        return jsonify({
-            "success": True,
-            "deleted": actor_id
-        })
-
     @app.route("/actors/<int:actor_id>", methods=["PATCH"])
-    def update_actor(actor_id):
+    @requires_auth('patch:actors')
+    def update_actor(jwt, actor_id):
         actor = Actor.query.get(actor_id)
         if actor is None:
             abort(404)
@@ -197,6 +192,19 @@ def create_app(test_config=None):
             print(e.args)
             abort(400)
 
+    @app.route("/actors/<int:actor_id>", methods=["DELETE"])
+    @requires_auth('delete:actors')
+    def delete_actor(jwt, actor_id):
+        actor = Actor.query.filter(Actor.id == actor_id).one_or_none()
+
+        if actor is None:
+            abort(404)
+
+        actor.delete()
+        return jsonify({
+            "success": True,
+            "deleted": actor_id
+        })
 
 # Error Handling
 # error handling for unprocessable entity
@@ -234,6 +242,31 @@ def create_app(test_config=None):
             "error": 405,
             "message": "method not allowed"
         }), 405
+
+    @app.errorhandler(401)
+    def notAuth(error):
+        return jsonify({
+            "success": False,
+            "error": 401,
+            "message": "unauthorized"
+        })
+
+    @app.errorhandler(403)
+    def forbidden(error):
+        return jsonify({
+            "success": False,
+            "error": 403,
+            "message": "forbidden"
+        })
+
+    @app.errorhandler(AuthError)
+    def auth_failed(error):
+        return jsonify({
+            'success': False,
+            'error': error.status_code,
+            'message': error.error
+        }), error.status_code
+
     return app
 
 
