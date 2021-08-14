@@ -1,6 +1,8 @@
 import os
+import flask_migrate
 from sqlalchemy import Column, String, Integer, create_engine
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate, migrate
 from dotenv import load_dotenv
 import json
 
@@ -24,8 +26,9 @@ def setup_db(app, database_path=db_path):
     app.config["SQLALCHEMY_DATABASE_URI"] = database_path
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.app = app
+    migrate = Migrate(app, db)
     db.init_app(app)
-    db.create_all()
+    # db.create_all()
 
 
 '''
