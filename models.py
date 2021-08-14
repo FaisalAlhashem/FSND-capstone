@@ -2,7 +2,7 @@ import os
 import flask_migrate
 from sqlalchemy import Column, String, Integer, create_engine
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate, migrate
+from flask_migrate import Migrate
 from dotenv import load_dotenv
 import json
 
