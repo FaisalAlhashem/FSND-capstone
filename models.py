@@ -30,7 +30,7 @@ def setup_db(app, database_path=db_path):
     db.app = app
     migrate = Migrate(app, db)
     db.init_app(app)
-    # db.create_all()
+    db.create_all()
 
 
 '''

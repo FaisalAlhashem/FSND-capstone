@@ -57,14 +57,14 @@ def create_app(test_config=None):
             release_date = body.get('release date', None)
             if not (title and release_date):
                 raise ValueError(
-                    'Some information is missing, unable to create question')
+                    'Some information is missing, unable to create movie')
             if MID:
                 movie = Movie(id=MID, title=title, release_date=release_date)
             else:
                 movie = Movie(title=title, release_date=release_date)
             movie.insert()
         except ValueError as Value_error:
-            print(Value_error.with_traceback(Value_error.__traceback__))
+            print(Value_error.args)
             abort(422)
         except Exception as e:
             print(e.args)
@@ -84,6 +84,9 @@ def create_app(test_config=None):
             if movie is None:
                 abort(404)
             body = request.get_json()
+            if body is None:
+                raise ValueError(
+                    'Some information is missing, unable to update movie')
 
             MID = body.get('id', movie.id)
             title = body.get('title', movie.title)
@@ -148,7 +151,7 @@ def create_app(test_config=None):
             gender = body.get('gender', None)
             if not (name and age and gender):
                 raise ValueError(
-                    'Some information is missing, unable to create question')
+                    'Some information is missing, unable to create actor')
             if AID != None:
                 actor = Actor(id=AID, name=name, age=age, gender=gender)
             else:
@@ -169,11 +172,14 @@ def create_app(test_config=None):
     @app.route("/actors/<int:actor_id>", methods=["PATCH"])
     @requires_auth('patch:actors')
     def update_actor(jwt, actor_id):
-        actor = Actor.query.get(actor_id)
-        if actor is None:
-            abort(404)
-        body = request.get_json()
         try:
+            actor = Actor.query.get(actor_id)
+            if actor is None:
+                abort(404)
+            body = request.get_json()
+            if body is None:
+                raise ValueError(
+                    'Some information is missing, unable to update actor')
             AID = body.get('id', actor.id)
             name = body.get('name', actor.name)
             age = body.get('age', actor.age)
@@ -243,21 +249,21 @@ def create_app(test_config=None):
             "message": "method not allowed"
         }), 405
 
-    @app.errorhandler(401)
-    def notAuth(error):
-        return jsonify({
-            "success": False,
-            "error": 401,
-            "message": "unauthorized"
-        })
+    # @app.errorhandler(401)
+    # def notAuth(error):
+    #     return jsonify({
+    #         "success": False,
+    #         "error": 401,
+    #         "message": "unauthorized"
+    #     })
 
-    @app.errorhandler(403)
-    def forbidden(error):
-        return jsonify({
-            "success": False,
-            "error": 403,
-            "message": "forbidden"
-        })
+    # @app.errorhandler(403)
+    # def forbidden(error):
+    #     return jsonify({
+    #         "success": False,
+    #         "error": 403,
+    #         "message": "forbidden"
+    #     })
 
     @app.errorhandler(AuthError)
     def auth_failed(error):
