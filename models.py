@@ -11,8 +11,10 @@ load_dotenv()
 db_UserAndPass = os.getenv('DB_USER_AND_PASS', 'postgres:postgres')
 db_host = os.getenv('DB_HOST', 'localhost:5432')
 db_name = os.getenv('DB_NAME', "capstone")
-db_path = "postgresql://{}@{}/{}".format(
-    db_UserAndPass, db_host, db_name)
+db_path = os.getenv("DATABASE_URL", "postgresql://{}@{}/{}".format(
+    db_UserAndPass, db_host, db_name))
+# db_path = "postgresql://{}@{}/{}".format(
+#     db_UserAndPass, db_host, db_name)
 
 db = SQLAlchemy()
 
