@@ -2,7 +2,6 @@ import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from flask_migrate import Migrate
 from psycopg2 import IntegrityError
 from models import setup_db, Movie, Actor
 from auth.auth import AuthError, requires_auth
