@@ -50,17 +50,17 @@ with columns for ID(Integer), name(String), age(Integer), and gender(String)
 
 i have implemented 3 roles for the api, each having diffrent permissons 
 
-# Casting Assistant
+#### Casting Assistant
 
     Can view actors and movies
 
-# Casting Director
+#### Casting Director
 
     All permissions a Casting Assistant has and…
     Add or delete an actor from the database
     Modify actors or movies
 
-# Executive Producer
+#### Executive Producer
 
     All permissions a Casting Director has and…
     Add or delete a movie from the database
