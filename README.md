@@ -1,10 +1,10 @@
 Capstone
 ---------
-## introduction
+## Introduction
 
 this is the final project in my journey in becoming a fullstack developer, i have to use everything i learned so far in the FSND course to get a casting agancy an api that can create, read, update and delete both movies and actors from a postgres database deployed using heroku with a postman collection to test the api
 
-### dependancies
+### Dependancies
 
 before starting the api you need to install all the needed python libraries and tools
 but it is recommended to use a virtual environment before installing the libraries
@@ -25,7 +25,7 @@ pip install -r requirments.txt
 ```
 to install all the needed dependancies 
 
-### running the API locally
+### Running the API locally
 
 after installing the needed dependancies if you wish to run the api locally cd into the capstone file and run the following command:
 ```
@@ -36,7 +36,7 @@ or if you want to run the unit tests run:
 python3 test_app.py
 ```
 
-### models and the database 
+### Models and The Database 
 
 the api uses postgresql as its database of choice, the database contains 2 tables 
 
@@ -46,7 +46,7 @@ with columns for ID(Integer), title(String), and release date(String) (in years)
 #### Actors
 with columns for ID(Integer), name(String), age(Integer), and gender(String)
 
-### roles
+### Roles
 
 i have implemented 3 roles for the api, each having diffrent permissons 
 
@@ -68,7 +68,7 @@ i have implemented 3 roles for the api, each having diffrent permissons
 
 
 
-### endpoints 
+### Endpoints 
 
 each model has it on CRUD endpoints while still complying with RESTful api architecture and requires a jwt with the proper permissons 
 
@@ -102,13 +102,21 @@ Endpoints:
       will update the info of the actor assosiated with the given ID, if no info is given it will return 400.
       you need to attach a json body containing the attributes you want to update
 
-### testing
+### Testing
 
 i have attached a postman collection of tests with valid JWTs for you to test the deployed api, these tests have a valid JWT token and can run indefinatly since the tests feed into each other.
 
 
-### accessing the api
+### Accessing the api
 
 the api has been deployed on heroku and the url to access it is:
-https://my-app-capstone.herokuapp.com
+[https://my-app-capstone.herokuapp.com]
 
+### Hosting
+
+in order to host the API you need to clone the repo, and create an app at heroku here [https://dashboard.heroku.com/apps]
+after creating the app you should link it to your git repo clone, after that you need a postgres database to make use of the api, run this command to add a postgres add on to your application
+```
+heroku addons:create heroku-postgresql:hobby-dev --app name_of_your_application
+```
+there is an issue with heroku's postgres addon though and that is that its database url is using a deprecated "postgres" as its dialect for sqlalchemy, you need to make a new environment variable called "DATBASE_URL" that is just the same as "DATABASE_URL" but with "postgresql" instead of "postgres" in the heroku config section of your app
